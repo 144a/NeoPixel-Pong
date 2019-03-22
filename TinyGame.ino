@@ -8,8 +8,11 @@ long randNumber;
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
+// 0 = Red; 1 = Green; 2 = Blue
+int colors[3][3] = {{100, 0, 0}, {0, 100, 0}, {0, 0, 100}};
+
 int delayval = 20;
-bool ledOn = true;
+int paddleColor = 0;
 
 void setup() {
   
@@ -20,28 +23,79 @@ void setup() {
 }
 
 void loop() {
-  int r = random(128);
-  int g = random(128);
-  int b = random(128);
   
-  pixels.setPixelColor(0, pixels.Color(r,g,b));
-  pixels.show(); // This sends the updated pixel color to the hardware.
-  delay(delayval); // Delay for a period of time (in milliseconds).
+  // Color Of Ball
+  int r = random(3);
+ 
+  // Sets First Led to correct color 
+  pixels.setPixelColor(0, pixels.Color(colors[paddleColor][0], colors[paddleColor][1], colors[paddleColor][2]));
+  pixels.show(); 
+  delay(delayval);
   
   int i = 1;
   while(i < NUMPIXELS) {
-    pixels.setPixelColor(i, pixels.Color(r,g,b));
-    pixels.show(); // This sends the updated pixel color to the hardware.
-    delay(delayval); // Delay for a period of time (in milliseconds).
-    pixels.setPixelColor(i - 1, pixels.Color(0,0,0));
-    pixels.show(); // This sends the updated pixel color to the hardware.
-    delay(delayval); // Delay for a period of time (in milliseconds).
+    // Reset paddle led because Im lazy
+    pixels.setPixelColor(0, pixels.Color(colors[paddleColor][0], colors[paddleColor][1], colors[paddleColor][2]));
+    
+    pixels.setPixelColor(i, pixels.Color(colors[r][0], colors[r][1], colors[r][2]));
+    pixels.show();
+    delay(delayval); 
+    pixels.setPixelColor(i - 1, pixels.Color(0, 0, 0));
+    pixels.show(); 
+    delay(delayval); 
     i++;
-    while(!digitalRead(SWITCH)) {
+    
+    // Changes Paddle Color
+    if(!digitalRead(SWITCH)) {
+      // Needs to be changed if there is going to be more than 3 colors
+      if(paddleColor == 2) {
+        paddleColor = -1;
+      }
+      paddleColor++;
+      pixels.setPixelColor(0, pixels.Color(colors[paddleColor][0], colors[paddleColor][1], colors[paddleColor][2]));
+      pixels.show();
+      delay(50);
     }
   }
-  pixels.setPixelColor(23, pixels.Color(0,0,0));
-  pixels.show(); // This sends the updated pixel color to the hardware.
+ 
+  //---------------------
+  // Opposite Direction
+  //---------------------
+  
+  // Color Of Ball
+  r = random(3);
+ 
+  // Sets First Led to correct color 
+  pixels.setPixelColor(23, pixels.Color(colors[paddleColor][0], colors[paddleColor][1], colors[paddleColor][2]));
+  pixels.show(); 
+  delay(delayval);
+  
+  i = NUMPIXELS - 1;
+  while(1 < i) {
+    // Reset paddle led because Im lazy
+    pixels.setPixelColor(0, pixels.Color(colors[paddleColor][0], colors[paddleColor][1], colors[paddleColor][2]));
+    
+    pixels.setPixelColor(i - 1, pixels.Color(colors[r][0], colors[r][1], colors[r][2]));
+    pixels.show();
+    delay(delayval); 
+    pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+    pixels.show(); 
+    delay(delayval); 
+    i--;
+    
+    // Changes Paddle Color
+    if(!digitalRead(SWITCH)) {
+      // Needs to be changed if there is going to be more than 3 colors
+      if(paddleColor == 2) {
+        paddleColor = -1;
+      }
+      paddleColor++;
+      pixels.setPixelColor(0, pixels.Color(colors[paddleColor][0], colors[paddleColor][1], colors[paddleColor][2]));
+      pixels.show();
+      delay(50);
+    }
+  }
+
   
     
 
